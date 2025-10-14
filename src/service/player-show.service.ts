@@ -99,11 +99,11 @@ export class PlayerShowService {
         queryBuilder.orderBy(`playerShow.${orderBy}`, orderDirection);
 
         // 分页
-        const page = query.page || 1;
-        const limit = query.limit || 10;
-        const offset = (page - 1) * limit;
-
-        queryBuilder.skip(offset).take(limit);
+        // const page = query.page || 1;
+        // const limit = query.limit || 10;
+        // const offset = (page - 1) * limit;
+        //
+        // queryBuilder.skip(offset).take(limit);
 
         const [list, total] = await queryBuilder.getManyAndCount();
 
@@ -403,4 +403,4 @@ export class PlayerShowService {
 
         return { list: responseList, total };
     }
-} 
+}
