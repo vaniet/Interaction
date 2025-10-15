@@ -128,4 +128,15 @@ export class SeriesController {
         }
         return ResponseResult.success(null, '款式描述更新成功');
     }
+
+    // 根据消息内容关键词搜索上架系列
+    @Post('/searchByMessage')
+    async searchSeriesByMessage(@Body() body: { keyword: string }) {
+        const keyword = (body?.keyword ?? '').trim();
+        if (!keyword) {
+            return ResponseResult.success([]);
+        }
+        const list = await this.seriesService.searchListedSeriesByMessageContent(keyword);
+        return ResponseResult.success(list);
+    }
 } 

@@ -1,6 +1,7 @@
 import { Provide } from '@midwayjs/core';
 import { InjectEntityModel } from '@midwayjs/typeorm';
 import type { Repository } from 'typeorm';
+import { In, Like } from 'typeorm';
 import { Series } from '../entity/series.entity';
 import { Style } from '../entity/style.entity';
 import { Stock } from '../entity/stock.entity';
@@ -159,5 +160,30 @@ export class SeriesService {
     );
 
     return true;
+  }
+
+  /**
+   * 基于消息内容关键词搜索上架系列
+   */
+  async searchListedSeriesByMessageContent(keyword: string): Promise<Series[]> {
+    const trimmed = (keyword ?? '').trim();
+    if (!trimmed) return [];
+
+    const messages = await this.messageModel.find({
+      where: { content: Like(`%${trimmed}%`) }
+    });
+
+    if (messages.length === 0) return [];
+
+    const seriesIds = Array.from(new Set(messages.map(m => m.seriesId)));
+
+    const result = await this.seriesModel.find({
+      where: {
+        id: In(seriesIds),
+        isListed: true,
+      },
+    });
+
+    return result;
   }
 } 
