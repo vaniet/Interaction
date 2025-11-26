@@ -1,8 +1,8 @@
-import { Body, Controller, Del, Post, Get, Param } from '@midwayjs/core';
+import { Body, Controller, Del, Post, Get, Param, Put } from '@midwayjs/core';
 import { Inject } from '@midwayjs/core';
 import { Context } from '@midwayjs/koa';
 import { AdvertisementService } from '../service/advertisement.service';
-import { CreateAdvertisementDTO } from '../dto/advertisement.dto';
+import { CreateAdvertisementDTO, UpdateAdvertisementDTO } from '../dto/advertisement.dto';
 import { ResponseResult } from '../common/response.common';
 import { JwtMiddleware } from '../middleware/jwt.middleware';
 
@@ -28,7 +28,7 @@ export class AdvertisementController {
   }
 
 //  删除广告
-  @Del('/:id', { middleware: [JwtMiddleware] })
+  @Del('/delete/:id', { middleware: [JwtMiddleware] })
   async deleteAdvertisement(@Param('id') id: number) {
     try {
       const userId = this.ctx.user.userId;
@@ -48,8 +48,54 @@ export class AdvertisementController {
     return ResponseResult.success(list);
   }
 
-//  获取已上架广告
+  //  获取已上架广告（无需权限）
+  @Get('/listed')
+  async getListed() {
+    const list = await this.advertisementService.getListed();
+    return ResponseResult.success(list);
+  }
 
+  //  更新广告（仅管理员）
+  @Put('/update/:id', { middleware: [JwtMiddleware] })
+  async update(
+    @Param('id') id: number,
+    @Body() dto: UpdateAdvertisementDTO
+  ) {
+    try {
+      const userId = this.ctx.user.userId;
+      const advertisement = await this.advertisementService.updateAdvertisement(
+        userId,
+        Number(id),
+        dto
+      );
+
+      return ResponseResult.success(advertisement, '广告更新成功');
+    } catch (err) {
+      return ResponseResult.error(err.message);
+    }
+  }
+
+  //  上下架广告（仅管理员）
+  @Post('/:id/listed', { middleware: [JwtMiddleware] })
+  async toggleListed(
+    @Param('id') id: number,
+    @Body() body: { isListed: boolean }
+  ) {
+    try {
+      const userId = this.ctx.user.userId;
+
+      const advertisement = await this.advertisementService.toggleListed(
+        userId,
+        Number(id),
+        body.isListed
+      );
+
+      const message = body.isListed ? '广告已上架' : '广告已下架';
+      return ResponseResult.success(advertisement, message);
+    } catch (err) {
+      return ResponseResult.error(err.message);
+    }
+  }
 }
 
 

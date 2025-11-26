@@ -16,17 +16,23 @@ export class Advertisement {
   @Column()
   seriesId: number;
 
-  @ManyToOne(() => Series, series => series.advertisements, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Series, { onDelete: 'CASCADE' })
+
   @JoinColumn({ name: 'seriesId' })
   series: Series;
 
   @Column({ length: 255 })
   cover: string;
 
+  @Column({ default: false })
+  isListed: boolean;
+
   @CreateDateColumn({ name: 'created_at' })
   createdAt: Date;
+
+  // 新增广告信息字段
+  @Column({ type: 'text', nullable: true })
+  info: string;
 }
 
 

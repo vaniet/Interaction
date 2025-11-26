@@ -28,7 +28,9 @@ export class UploadController {
                         ? 'avatar'
                         : type === 'player-show'
                             ? 'player-show'
-                            : 'other';
+                                : type === 'advertisement'
+                                    ? 'advertisement'
+                                        : 'other';
         const uploadDir = join(process.cwd(), 'public', folder);
         if (!existsSync(uploadDir)) mkdirSync(uploadDir, { recursive: true });
         const ext = files[0].filename.substring(files[0].filename.lastIndexOf('.'));

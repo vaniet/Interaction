@@ -7,3 +7,4 @@ export { PlayerShow } from './player-show.entity';
 export { Price } from './price.entity';
 export { Message } from './message.entity';
 export { Comment } from './comment.entity';
+export { Advertisement } from './advertisement.entity'
