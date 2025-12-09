@@ -19,6 +19,7 @@ import {
     QueryCommentDTO
 } from '../dto/comment.dto';
 import { ShippingStatus } from '../entity/purchase.entity';
+import { UserRole } from '../dto/user.dto';
 
 @Provide()
 export class PlayerShowService {
@@ -223,12 +224,30 @@ export class PlayerShowService {
      * @returns 是否删除成功
      */
     async deletePlayerShow(id: number, userId: number): Promise<boolean> {
+        // 先查找玩家秀（不限制 userId）
         const playerShow = await this.playerShowModel.findOne({
-            where: { id, userId }
+            where: { id }
         });
 
         if (!playerShow) {
-            throw new Error('玩家秀不存在或无权限删除');
+            throw new Error('玩家秀不存在');
+        }
+
+        // 查找当前用户
+        const user = await this.userModel.findOne({
+            where: { userId }
+        });
+
+        if (!user) {
+            throw new Error('未登录或会话已过期');
+        }
+
+        // 检查权限：发布者或管理员都可以删除
+        const isPublisher = playerShow.userId === userId;
+        const isManager = user.role === UserRole.MANAGER;
+
+        if (!isPublisher && !isManager) {
+            throw new Error('无权限删除，仅发布者和管理员可以删除');
         }
 
         await this.playerShowModel.remove(playerShow);
